@@ -20,4 +20,5 @@ RUN chmod -R 777 /app
 EXPOSE 8080
 
 # Command to run Streamlit in strict Headless/Production mode
-CMD ["streamlit", "run", "app.py", "--server.port=8080", "--server.address=0.0.0.0", "--server.headless=true", "--server.enableCORS=false", "--server.enableXsrfProtection=false", "--browser.gatherUsageStats=false"]
+# This forces Streamlit to use Google's 8080 port and bind to 0.0.0.0
+CMD streamlit run app.py --server.port=${PORT} --server.address=0.0.0.0 --server.headless=true
