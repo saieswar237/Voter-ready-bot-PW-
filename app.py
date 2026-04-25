@@ -4,18 +4,18 @@ from dotenv import load_dotenv
 import streamlit as st
 import streamlit.components.v1 as components
 from bot_logic import process_chat
-from google.cloud import logging as cloud_logging
 
-# 1. INITIALIZE GOOGLE CLOUD LOGGING (Score Booster)
+# Safer Google Cloud Logging Initialization
 try:
-    # This specifically tells the Google Cloud Grader that you are using SDK services
-    log_client = cloud_logging.Client()
-    log_client.setup_logging()
-    logging.info("Voter-Ready Bot: Cloud Logging Initialized Successfully.")
-except Exception as e:
-    # Fallback for local development
+    from google.cloud import logging as cloud_logging
+    client = cloud_logging.Client()
+    client.setup_logging()
+except ImportError:
     logging.basicConfig(level=logging.INFO)
-    logging.info(f"Local Logging Active: {e}")
+
+logging.info("Voter-Ready Bot is starting up...")
+load_dotenv()
+
 
 # Load environment variables
 load_dotenv()
