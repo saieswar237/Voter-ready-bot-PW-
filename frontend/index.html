@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body,
+        html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 900px;
+            background: radial-gradient(circle at center, #1a1a2e 0%, #000000 100%);
+            color: #fff;
+            font-family: 'Space Grotesk', sans-serif;
+            overflow: hidden;
+        }
+
+        #particles-js {
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+        }
+
+        .container {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            height: 900px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 40px;
+            box-sizing: border-box;
+        }
+
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            text-align: center;
+            max-width: 800px;
+            width: 95%;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
+            display: none;
+        }
+
+        .glass-card.active {
+            display: block;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            margin-bottom: 20px;
+            font-weight: 600;
+            letter-spacing: -1px;
+        }
+
+        p {
+            font-size: 1.15rem;
+            color: #b0b0c0;
+            margin-bottom: 30px;
+            line-height: 1.6;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            background: rgba(255, 255, 255, 0.05);
+            color: #fff;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 14px 30px;
+            font-size: 1rem;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Space Grotesk', sans-serif;
+            outline: none;
+        }
+
+        .btn:hover {
+            background: #fff;
+            color: #000;
+            transform: translateY(-3px);
+        }
+
+        /* I PUT THIS BACK: The Main AI Response Text styling */
+        .result-text {
+            font-size: 1.15rem;
+            text-align: left;
+            line-height: 1.7;
+            color: #e2e2e2;
+            margin-bottom: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .result-text b,
+        .result-text strong {
+            color: #fff;
+        }
+
+        /* INTERNAL SCROLLING CHAT BOX */
+        #chat-history {
+            max-height: 200px;
+            overflow-y: auto;
+            padding: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            margin-bottom: 20px;
+            background: rgba(0, 0, 0, 0.4);
+            display: none;
+            /* Hidden until you actually ask a follow-up question */
+        }
+
+        .chat-bubble {
+            display: inline-block;
+            text-align: left;
+            padding: 12px 18px;
+            border-radius: 15px;
+            max-width: 90%;
+            font-size: 1.05rem;
+            line-height: 1.5;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+    </style>
+</head>
+
+<body>
+    <div id="particles-js" aria-hidden="true"></div>
+    <div class="container" role="main">
+
+        <div id="stage0" class="glass-card active" role="region">
+            <h1>The Power of Vote</h1>
+            <p>The first Indian election took 4 months to complete.<br>Today, the power is in your hands in seconds.</p>
+            <div class="btn-container"><button class="btn" onclick="nextStage(1)">Enter the Wizard</button></div>
+        </div>
+
+        <div id="stage1" class="glass-card" role="region">
+            <h1>Are you 18 or older?</h1>
+            <p>You must be 18 years of age on the qualifying date to be eligible to vote.</p>
+            <div class="btn-container">
+                <button class="btn" onclick="setAge('yes')">Yes, I am 18+</button>
+                <button class="btn" onclick="setAge('no')">No, I'm under 18</button>
+            </div>
+        </div>
+
+        <div id="stage2" class="glass-card" role="region">
+            <h1>Do you have a Voter ID?</h1>
+            <p>Also known as the EPIC card. It is required to cast your vote.</p>
+            <div class="btn-container">
+                <button class="btn" onclick="setDoc('yes')">Yes, I have it</button>
+                <button class="btn" onclick="setDoc('no')">No, I don't</button>
+            </div>
+        </div>
+
+        <div id="stage3" class="glass-card" role="region">
+            <h1 id="result-title">Your Path Forward</h1>
+
+            <div id="result-content" class="result-text" aria-live="polite">
+                <div style="text-align:center; padding: 20px;" aria-hidden="true">
+                    <svg width="50" height="50" viewBox="0 0 50 50" stroke="#fff">
+                        <g fill="none" fill-rule="evenodd" stroke-width="4">
+                            <circle cx="25" cy="25" r="20" stroke-opacity=".2" />
+                            <path d="M25 5c0 0 20 0 20 20">
+                                <animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25"
+                                    dur="1s" repeatCount="indefinite" />
+                            </path>
+                        </g>
+                    </svg>
+                </div>
+            </div>
+
+            <div id="chat-interface" style="display:none; text-align: left;">
+                <div id="chat-history" role="log" aria-live="polite">
+                    <div id="chat-history-content"></div>
+                </div>
+
+                <div id="typing-indicator" style="display:none; text-align: left; margin-bottom: 10px;">
+                    <div
+                        style="display: inline-block; background: rgba(255, 255, 255, 0.1); padding: 10px 15px; border-radius: 15px; color: #ccc; font-style: italic;">
+                        Thinking...</div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="chat-input" placeholder="Ask a follow-up question..."
+                        onkeypress="handleKeyPress(event)"
+                        style="flex: 1; padding: 15px 20px; border-radius: 30px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.05); color: #fff; font-family: 'Space Grotesk', sans-serif; font-size: 1rem; outline: none;">
+                    <button class="btn" style="padding: 10px 30px; margin: 0;" onclick="sendChat()">Send</button>
+                </div>
+            </div>
+
+            <div class="btn-container" style="margin-top: 15px;">
+                <button id="restart-btn" class="btn" style="display:none;" onclick="startOver()">Start Over</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        particlesJS("particles-js", {
+            "particles": { "number": { "value": 80 }, "color": { "value": "#ffffff" }, "opacity": { "value": 0.4 }, "size": { "value": 2.5 }, "line_linked": { "enable": true, "distance": 150, "opacity": 0.15 }, "move": { "enable": true, "speed": 1.5 } }
+        });
+
+        let userData = { age: null, has_id: null };
+
+        function transition(fromId, toId) {
+            document.querySelector(fromId).classList.remove("active");
+            document.querySelector(toId).classList.add("active");
+        }
+
+        function nextStage(stage) { transition("#stage0", "#stage1"); }
+
+        function setAge(val) {
+            userData.age = val;
+            if (val === 'no') { transition("#stage1", "#stage3"); sendData(); }
+            else { transition("#stage1", "#stage2"); }
+        }
+
+        function setDoc(val) {
+            userData.has_id = val;
+            transition("#stage2", "#stage3");
+            sendData();
+        }
+
+        function sendData() {
+            document.getElementById("chat-interface").style.display = "block";
+            document.getElementById("typing-indicator").style.display = "block";
+            document.getElementById("result-content").innerHTML = `<div style="text-align:center; padding: 20px;"><svg width="50" height="50" viewBox="0 0 50 50" stroke="#fff"><g fill="none" fill-rule="evenodd" stroke-width="4"><circle cx="25" cy="25" r="20" stroke-opacity=".2"/><path d="M25 5c0 0 20 0 20 20"><animateTransform attributeName="transform" type="rotate" from="0 25 25" to="360 25 25" dur="1s" repeatCount="indefinite"/></path></g></svg></div>`;
+
+            let payload = "I am ";
+            if (userData.age === 'no') { payload += "under 18 years old and want to know about voting in India."; }
+            else {
+                payload += "over 18 years old. ";
+                if (userData.has_id === 'yes') { payload += "I DO have my Voter ID (EPIC card). Explain briefly what I should do inside the polling booth."; }
+                else { payload += "I DO NOT have a Voter ID. How do I get one?"; }
+            }
+            Streamlit.setComponentValue({ action: "fetch_result", prompt: payload });
+        }
+
+        function sendChat() {
+            let inputEl = document.getElementById("chat-input");
+            let text = inputEl.value.trim();
+            if (!text) return;
+            document.getElementById("typing-indicator").style.display = "block";
+            inputEl.value = "";
+            Streamlit.setComponentValue({ action: "chat", prompt: text });
+        }
+
+        function handleKeyPress(e) { if (e.key === "Enter") sendChat(); }
+
+        function startOver() {
+            userData = { age: null, has_id: null };
+            document.getElementById("result-content").innerHTML = "";
+            document.getElementById("chat-history-content").innerHTML = "";
+            document.getElementById("chat-history").style.display = "none";
+            document.getElementById("chat-interface").style.display = "none";
+            document.getElementById("restart-btn").style.display = "none";
+            transition("#stage3", "#stage0");
+            Streamlit.setComponentValue({ action: "reset" });
+        }
+
+        function formatText(text) {
+            return text.replace(/\*\*(.*?)\*\*/g, '<b>$1</b>')
+                .replace(/\*(.*?)\*/g, '<i>$1</i>')
+                .replace(/\n/g, '<br>');
+        }
+
+        const Streamlit = {
+            setComponentReady: function () { window.parent.postMessage({ isStreamlitMessage: true, type: "streamlit:componentReady", apiVersion: 1 }, "*"); },
+            setFrameHeight: function (height) { window.parent.postMessage({ isStreamlitMessage: true, type: "streamlit:setFrameHeight", height: height }, "*"); },
+            setComponentValue: function (value) { window.parent.postMessage({ isStreamlitMessage: true, type: "streamlit:setComponentValue", value: value, dataType: "json" }, "*"); }
+        };
+
+        window.addEventListener("message", function (event) {
+            if (event.data.type === "streamlit:render") {
+                const data = event.data.args;
+                if (data && data.messages && data.messages.length > 0) {
+                    if (!document.getElementById("stage3").classList.contains("active")) {
+                        document.querySelectorAll('.glass-card').forEach(el => el.classList.remove('active'));
+                        document.getElementById("stage3").classList.add("active");
+                        document.getElementById("chat-interface").style.display = "block";
+                    }
+
+                    document.getElementById("typing-indicator").style.display = "none";
+                    document.getElementById("restart-btn").style.display = "inline-block";
+
+                    // Split the First Message (The big guide) from the Follow-up Chat History
+                    let assistantMsgs = data.messages.filter(m => m.role === 'assistant');
+
+                    if (assistantMsgs.length > 0) {
+                        // Put the first big answer in the main text box
+                        document.getElementById("result-content").innerHTML = formatText(assistantMsgs[0].content);
+                    }
+
+                    // Only build the chat bubble history if you actually sent follow-up questions
+                    if (data.messages.length > 2) {
+                        let chatHtml = "";
+                        let chatMsgs = data.messages.slice(2); // Skip the first prompt and first answer
+                        for (let msg of chatMsgs) {
+                            let align = msg.role === 'user' ? 'right' : 'left';
+                            let color = msg.role === 'user' ? '#4dabf7' : '#e2e2e2';
+                            let bg = msg.role === 'user' ? 'rgba(77, 171, 247, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+                            let content = formatText(msg.content);
+                            chatHtml += `<div style="text-align: ${align}; margin-bottom: 12px;"><div class="chat-bubble" style="background: ${bg}; color: ${color};">${content}</div></div>`;
+                        }
+                        document.getElementById("chat-history-content").innerHTML = chatHtml;
+                        document.getElementById("chat-history").style.display = "block";
+
+                        // Scroll to the newest message
+                        setTimeout(() => {
+                            let historyDiv = document.getElementById("chat-history");
+                            historyDiv.scrollTop = historyDiv.scrollHeight;
+                        }, 50);
+                    }
+                }
+
+                // HARDCODED HEIGHT. NEVER CHANGES. NEVER LOOPS.
+                Streamlit.setFrameHeight(900);
+            }
+        });
+
+        Streamlit.setComponentReady();
+        Streamlit.setFrameHeight(900);
+    </script>
+</body>
+
+</html>

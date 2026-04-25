@@ -19,5 +19,4 @@ __pycache__/
 .DS_Store
 
 # Streamlit
-frontend/
 .streamlit/
