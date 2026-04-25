@@ -1,6 +1,6 @@
-google-cloud-logging
 streamlit
 google-generativeai
+google-cloud-logging
 python-dotenv
 pytest
 pytest-mock
