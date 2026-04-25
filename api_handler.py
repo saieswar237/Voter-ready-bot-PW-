@@ -10,8 +10,8 @@ def get_gemini_response(prompt):
         
     genai.configure(api_key=api_key)
     
-    # Using the stable flash model
-    model = genai.GenerativeModel('gemini-1.5-flash')
+    # FIXED: Upgraded to the currently active 2.5 model!
+    model = genai.GenerativeModel('gemini-2.5-flash')
     
     try:
         response = model.generate_content(prompt)
